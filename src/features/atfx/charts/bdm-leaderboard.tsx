@@ -8,20 +8,29 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ChartEmptyState } from '@/components/dashboard/chart-empty-state'
 import {
   computeAwards,
-  scoreBdms,
   scoreBdmsForMonth,
+  scoreBdmsForMonthInSourceOrder,
   SCORECARD_LEGEND_YEAR,
-  SCORECARD_PRIMARY_MONTH,
+  SCORECARD_MONTHS,
   type RecognitionTier,
   type ScorecardSort,
   type ScoredBdm,
 } from './bdm-scorecard-data'
 
 const RANK_BADGES = ['🥇', '🥈', '🥉'] as const
+
+const MONTH_LABELS: Record<string, string> = { Jun: 'June', Jul: 'July' }
 
 const RECOGNITION_ACCENT: Record<
   Exclude<RecognitionTier, 'No Recognition'>,
@@ -33,15 +42,21 @@ const RECOGNITION_ACCENT: Record<
 }
 
 export function BdmLeaderboard() {
-  const [sort, setSort] = useState<ScorecardSort>('rank')
-  const rows = useMemo(() => scoreBdms(undefined, sort), [sort])
-  const awards = useMemo(
-    () => computeAwards(scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH)),
-    [],
+  const [month, setMonth] = useState<string>(
+    SCORECARD_MONTHS[SCORECARD_MONTHS.length - 1] ?? SCORECARD_MONTHS[0],
   )
-
-  if (rows.length === 0)
-    return <ChartEmptyState message='No BDM scorecard data' />
+  const [sort, setSort] = useState<ScorecardSort>('rank')
+  const rows = useMemo(
+    () =>
+      sort === 'rank'
+        ? scoreBdmsForMonth(month)
+        : scoreBdmsForMonthInSourceOrder(month),
+    [month, sort],
+  )
+  const awards = useMemo(
+    () => computeAwards(scoreBdmsForMonth(month)),
+    [month],
+  )
 
   return (
     <div className='space-y-4'>
@@ -68,7 +83,25 @@ export function BdmLeaderboard() {
         ))}
       </div>
 
-      <div className='flex justify-end'>
+      <div className='flex flex-wrap items-center justify-between gap-3'>
+        <div className='flex items-center gap-2'>
+          <label htmlFor='bdm-scorecard-month' className='text-sm font-medium'>
+            Month
+          </label>
+          <Select value={month} onValueChange={setMonth}>
+            <SelectTrigger id='bdm-scorecard-month' size='sm' className='w-32'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SCORECARD_MONTHS.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {MONTH_LABELS[m] ?? m}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <ToggleGroup
           type='single'
           variant='outline'
@@ -81,24 +114,27 @@ export function BdmLeaderboard() {
         </ToggleGroup>
       </div>
 
-      <div className='overflow-x-auto'>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className='w-16'>Month</TableHead>
-              <TableHead>BDM Name</TableHead>
-              <TableHead className='text-end'>Final Score</TableHead>
-              <TableHead className='text-center'>Movement</TableHead>
-              <TableHead>Recognition</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((row) => (
-              <LeaderRow key={`${row.month}-${row.name}`} row={row} />
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      {rows.length === 0 ? (
+        <ChartEmptyState message='No BDM scorecard data' />
+      ) : (
+        <div className='overflow-x-auto'>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>BDM Name</TableHead>
+                <TableHead className='text-end'>Final Score</TableHead>
+                <TableHead className='text-center'>Movement</TableHead>
+                <TableHead>Recognition</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <LeaderRow key={row.name} row={row} />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       <p className='text-xs text-muted-foreground'>
         {SCORECARD_LEGEND_YEAR} · weighted score (Net Deposit 40% · MIB 20% ·
@@ -115,7 +151,6 @@ function LeaderRow({ row }: { row: ScoredBdm }) {
 
   return (
     <TableRow>
-      <TableCell className='text-muted-foreground'>{row.month}</TableCell>
       <TableCell className='font-medium'>
         <span className='inline-flex items-center gap-2'>
           {badge ? (
