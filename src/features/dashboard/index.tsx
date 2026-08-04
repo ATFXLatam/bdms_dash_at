@@ -6,7 +6,10 @@ import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Card, CardContent } from '@/components/ui/card'
-import { BdmPerformanceTable } from '@/features/atfx/components/bdm-performance-table'
+import { BdmLeaderboard } from '@/features/atfx/charts/bdm-leaderboard'
+import { BdmMovementBoards } from '@/features/atfx/charts/bdm-movement'
+import { RecognitionDistribution } from '@/features/atfx/charts/recognition-distribution'
+import { RegionPerformance } from '@/features/atfx/charts/region-performance'
 
 const DASHBOARD_PAD = 'w-full px-[clamp(0.75rem,3.5vw,3rem)]'
 
@@ -28,17 +31,35 @@ export function Dashboard() {
           <div className={`${DASHBOARD_PAD} flex flex-col gap-8`}>
             <DashboardSection
               title='BDM performance'
-              description='Net deposit, MIB, lots and IB activation'
+              description='Monthly scorecard, movement and recognition'
             >
               <Card>
                 <DashboardCardHeader
-                  title='Rendimiento BDM'
-                  description='Hardcoded from Datos_BDM_Extraidos · Jun + Jul'
+                  title='BDM monthly scorecard'
+                  description='June · ranked by weighted performance score'
+                  tooltip='Monthly BDM scorecard. Final score weights Net Deposit 40%, MIB 20%, Active IB 20% and Lots 20%, each min-max normalized across BDMs. Movement compares this rank to the prior month; recognition and awards are derived from the score.'
                 />
                 <CardContent className='pb-4'>
-                  <BdmPerformanceTable />
+                  <BdmLeaderboard />
                 </CardContent>
               </Card>
+
+              <BdmMovementBoards />
+
+              <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+                <Card>
+                  <DashboardCardHeader
+                    title='Recognition distribution'
+                    description='Recognition mix across BDMs'
+                    tooltip='Share of BDMs in each recognition tier across the full population.'
+                  />
+                  <CardContent className='pb-4'>
+                    <RecognitionDistribution />
+                  </CardContent>
+                </Card>
+
+                <RegionPerformance />
+              </div>
             </DashboardSection>
           </div>
         </div>
