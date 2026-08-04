@@ -8,7 +8,6 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { Card, CardContent } from '@/components/ui/card'
 import { BdmLeaderboard } from '@/features/atfx/charts/bdm-leaderboard'
 import { BdmMovementBoards } from '@/features/atfx/charts/bdm-movement'
-import { RecognitionDistribution } from '@/features/atfx/charts/recognition-distribution'
 import { RegionPerformance } from '@/features/atfx/charts/region-performance'
 
 const DASHBOARD_PAD = 'w-full px-[clamp(0.75rem,3.5vw,3rem)]'
@@ -46,20 +45,7 @@ export function Dashboard() {
 
               <BdmMovementBoards />
 
-              <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
-                <Card>
-                  <DashboardCardHeader
-                    title='Recognition distribution'
-                    description='Recognition mix across BDMs'
-                    tooltip='Share of BDMs in each recognition tier across the full population.'
-                  />
-                  <CardContent className='pb-4'>
-                    <RecognitionDistribution />
-                  </CardContent>
-                </Card>
-
-                <RegionPerformance />
-              </div>
+              <RegionPerformance />
             </DashboardSection>
           </div>
         </div>
