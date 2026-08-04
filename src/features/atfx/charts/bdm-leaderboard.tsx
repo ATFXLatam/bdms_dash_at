@@ -33,7 +33,7 @@ const RECOGNITION_ACCENT: Record<
 }
 
 export function BdmLeaderboard() {
-  const [sort, setSort] = useState<ScorecardSort>('excel')
+  const [sort, setSort] = useState<ScorecardSort>('rank')
   const rows = useMemo(() => scoreBdms(undefined, sort), [sort])
   const awards = useMemo(
     () => computeAwards(scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH)),
@@ -76,8 +76,8 @@ export function BdmLeaderboard() {
           value={sort}
           onValueChange={(v) => v && setSort(v as ScorecardSort)}
         >
-          <ToggleGroupItem value='excel'>Excel order</ToggleGroupItem>
-          <ToggleGroupItem value='rank'>Rank order</ToggleGroupItem>
+          <ToggleGroupItem value='rank'>Top performers first</ToggleGroupItem>
+          <ToggleGroupItem value='excel'>Report order</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
@@ -85,7 +85,6 @@ export function BdmLeaderboard() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className='w-14'>Rank</TableHead>
               <TableHead className='w-16'>Month</TableHead>
               <TableHead>BDM Name</TableHead>
               <TableHead className='text-end'>Final Score</TableHead>
@@ -116,21 +115,14 @@ function LeaderRow({ row }: { row: ScoredBdm }) {
 
   return (
     <TableRow>
-      <TableCell className='font-medium tabular-nums'>
-        {badge ? (
-          <span className='inline-flex items-center gap-1'>
-            <span role='img' aria-hidden='true'>
-              {badge}
-            </span>
-            <span className='text-muted-foreground'>#{row.rank}</span>
-          </span>
-        ) : (
-          `#${row.rank}`
-        )}
-      </TableCell>
       <TableCell className='text-muted-foreground'>{row.month}</TableCell>
       <TableCell className='font-medium'>
         <span className='inline-flex items-center gap-2'>
+          {badge ? (
+            <span role='img' aria-hidden='true'>
+              {badge}
+            </span>
+          ) : null}
           {row.name}
           {row.rank <= 5 ? (
             <span className='rounded bg-[var(--highlight)]/10 px-1.5 py-0.5 text-[0.625rem] font-medium uppercase leading-none text-[var(--highlight)]'>
