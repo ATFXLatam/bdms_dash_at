@@ -37,7 +37,7 @@ const RECOGNITION_ACCENT: Record<
   string
 > = {
   'Top Performer': 'text-[var(--highlight)]',
-  Recognition: 'text-[var(--highlight-200)]',
+  'High Performer': 'text-[var(--highlight-200)]',
   'Growth Contribution': 'text-emerald-600 dark:text-emerald-400',
 }
 

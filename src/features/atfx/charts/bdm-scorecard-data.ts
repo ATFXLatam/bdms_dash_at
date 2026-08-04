@@ -4,7 +4,7 @@
 
 export type RecognitionTier =
   | 'Top Performer'
-  | 'Recognition'
+  | 'High Performer'
   | 'Growth Contribution'
   | 'No Recognition'
 
@@ -83,10 +83,12 @@ function minMaxScaler(values: number[]): (value: number) => number {
   return (value) => (range === 0 ? 0 : (value - min) / range)
 }
 
-function recognitionFor(rank: number, movement: number): RecognitionTier {
+// rank 1 = Top Performer; ranks 2-5 = High Performer; positive Net Deposit
+// (any rank beyond 5) = Growth Contribution; otherwise no tag.
+function recognitionFor(rank: number, netDeposit: number): RecognitionTier {
   if (rank === 1) return 'Top Performer'
-  if (rank <= 5) return 'Recognition'
-  if (movement > 0) return 'Growth Contribution'
+  if (rank <= 5) return 'High Performer'
+  if (netDeposit > 0) return 'Growth Contribution'
   return 'No Recognition'
 }
 
@@ -116,7 +118,12 @@ function scoreMonth(entries: BdmScorecardEntry[]): ScoredBdm[] {
   return scored.map((e, i) => {
     const rank = i + 1
     const movement = e.prevRank - rank
-    return { ...e, rank, movement, recognition: recognitionFor(rank, movement) }
+    return {
+      ...e,
+      rank,
+      movement,
+      recognition: recognitionFor(rank, e.netDeposit),
+    }
   })
 }
 
