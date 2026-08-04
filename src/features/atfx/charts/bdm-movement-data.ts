@@ -1,6 +1,10 @@
 // DERIVED from the single-source scorecard — do not add data here.
 
-import { scoreBdms, type RecognitionTier } from './bdm-scorecard-data'
+import {
+  SCORECARD_PRIMARY_MONTH,
+  scoreBdmsForMonth,
+  type RecognitionTier,
+} from './bdm-scorecard-data'
 
 export interface BdmMovement {
   name: string
@@ -14,7 +18,7 @@ export function movement(row: BdmMovement): number {
   return row.prevRank - row.currentRank
 }
 
-const SCORED = scoreBdms().map(
+const SCORED = scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH).map(
   (b): BdmMovement => ({
     name: b.name,
     prevRank: b.prevRank,

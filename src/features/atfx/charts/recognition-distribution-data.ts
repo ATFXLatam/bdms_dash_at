@@ -1,6 +1,10 @@
 // DERIVED from the single-source scorecard — do not add data here.
 
-import { scoreBdms, type RecognitionTier } from './bdm-scorecard-data'
+import {
+  SCORECARD_PRIMARY_MONTH,
+  scoreBdmsForMonth,
+  type RecognitionTier,
+} from './bdm-scorecard-data'
 
 export interface RecognitionSlice {
   tier: RecognitionTier
@@ -20,7 +24,7 @@ const TIER_META: Array<Pick<RecognitionSlice, 'tier' | 'key' | 'color'>> = [
   { tier: 'Top Performer', key: 'topPerformer', color: 'var(--highlight)' },
 ]
 
-const scored = scoreBdms()
+const scored = scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH)
 const total = scored.length || 1
 
 export const RECOGNITION_DISTRIBUTION: RecognitionSlice[] = TIER_META.map(

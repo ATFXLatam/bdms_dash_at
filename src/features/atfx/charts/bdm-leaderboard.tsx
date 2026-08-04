@@ -12,7 +12,9 @@ import { ChartEmptyState } from '@/components/dashboard/chart-empty-state'
 import {
   computeAwards,
   scoreBdms,
+  scoreBdmsForMonth,
   SCORECARD_LEGEND_YEAR,
+  SCORECARD_PRIMARY_MONTH,
   type RecognitionTier,
   type ScoredBdm,
 } from './bdm-scorecard-data'
@@ -28,25 +30,11 @@ const RECOGNITION_ACCENT: Record<
   'Growth Contribution': 'text-emerald-600 dark:text-emerald-400',
 }
 
-function hasNoResults(row: ScoredBdm): boolean {
-  return (
-    row.netDeposit === 0 &&
-    row.mibs === 0 &&
-    row.activeIbs === 0 &&
-    row.lots === 0
-  )
-}
-
-export function BdmLeaderboard({ limit }: { limit?: number }) {
-  const scored = useMemo(() => scoreBdms(), [])
-  const awards = useMemo(() => computeAwards(scored), [scored])
-  const withResults = useMemo(
-    () => scored.filter((row) => !hasNoResults(row)),
-    [scored],
-  )
-  const rows = useMemo(
-    () => (limit ? withResults.slice(0, limit) : withResults),
-    [withResults, limit],
+export function BdmLeaderboard() {
+  const rows = useMemo(() => scoreBdms(), [])
+  const awards = useMemo(
+    () => computeAwards(scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH)),
+    [],
   )
 
   if (rows.length === 0)
@@ -82,6 +70,7 @@ export function BdmLeaderboard({ limit }: { limit?: number }) {
           <TableHeader>
             <TableRow>
               <TableHead className='w-14'>Rank</TableHead>
+              <TableHead className='w-16'>Month</TableHead>
               <TableHead>BDM Name</TableHead>
               <TableHead className='text-end'>Final Score</TableHead>
               <TableHead className='text-center'>Movement</TableHead>
@@ -90,7 +79,7 @@ export function BdmLeaderboard({ limit }: { limit?: number }) {
           </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <LeaderRow key={row.name} row={row} />
+              <LeaderRow key={`${row.month}-${row.name}`} row={row} />
             ))}
           </TableBody>
         </Table>
@@ -123,6 +112,7 @@ function LeaderRow({ row }: { row: ScoredBdm }) {
           `#${row.rank}`
         )}
       </TableCell>
+      <TableCell className='text-muted-foreground'>{row.month}</TableCell>
       <TableCell className='font-medium'>
         <span className='inline-flex items-center gap-2'>
           {row.name}
