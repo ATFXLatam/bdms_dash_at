@@ -35,8 +35,6 @@ export const SCORECARD_MONTH = 'June'
 export const SCORECARD_PRIMARY_MONTH = 'Jun'
 export const SCORECARD_LEGEND_YEAR = '2026'
 
-const MONTH_ORDER = ['Jul', 'Jun'] as const
-
 export const SCORE_WEIGHTS = {
   netDeposit: 0.4,
   mibs: 0.2,
@@ -122,25 +120,28 @@ function scoreMonth(entries: BdmScorecardEntry[]): ScoredBdm[] {
   })
 }
 
-function monthSortKey(month: string): number {
-  const idx = MONTH_ORDER.indexOf(month as (typeof MONTH_ORDER)[number])
-  return idx === -1 ? 99 : idx
-}
-
-// Scores each month independently, then flattens (latest month first).
-export function scoreBdms(
-  entries: BdmScorecardEntry[] = BDM_SCORECARD,
-): ScoredBdm[] {
-  const months = [...new Set(entries.map((e) => e.month))].sort(
-    (a, b) => monthSortKey(a) - monthSortKey(b),
-  )
-  return months.flatMap((month) =>
-    scoreMonth(entries.filter((e) => e.month === month)),
-  )
-}
-
 export function scoreBdmsForMonth(month: string): ScoredBdm[] {
   return scoreMonth(BDM_SCORECARD.filter((e) => e.month === month))
+}
+
+// Score within each month, but keep the excel/source row order (no re-sort).
+export function scoreBdmsInSourceOrder(
+  entries: BdmScorecardEntry[] = BDM_SCORECARD,
+): ScoredBdm[] {
+  const scoredByKey = new Map<string, ScoredBdm>()
+  const months = [...new Set(entries.map((e) => e.month))]
+  for (const month of months) {
+    for (const row of scoreMonth(entries.filter((e) => e.month === month))) {
+      scoredByKey.set(`${row.month}:${row.name}`, row)
+    }
+  }
+  return entries.map((entry) => {
+    const scored = scoredByKey.get(`${entry.month}:${entry.name}`)
+    if (!scored) {
+      throw new Error(`Missing score for ${entry.month}:${entry.name}`)
+    }
+    return scored
+  })
 }
 
 export interface Award {

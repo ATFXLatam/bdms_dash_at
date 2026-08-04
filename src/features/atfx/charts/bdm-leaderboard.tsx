@@ -11,8 +11,8 @@ import {
 import { ChartEmptyState } from '@/components/dashboard/chart-empty-state'
 import {
   computeAwards,
-  scoreBdms,
   scoreBdmsForMonth,
+  scoreBdmsInSourceOrder,
   SCORECARD_LEGEND_YEAR,
   SCORECARD_PRIMARY_MONTH,
   type RecognitionTier,
@@ -31,7 +31,7 @@ const RECOGNITION_ACCENT: Record<
 }
 
 export function BdmLeaderboard() {
-  const rows = useMemo(() => scoreBdms(), [])
+  const rows = useMemo(() => scoreBdmsInSourceOrder(), [])
   const awards = useMemo(
     () => computeAwards(scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH)),
     [],
