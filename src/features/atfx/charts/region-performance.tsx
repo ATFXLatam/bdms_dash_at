@@ -9,15 +9,19 @@ const num2 = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 })
-const numFlex = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
 const numInt = new Intl.NumberFormat('en-US')
 
-const METRICS: Array<{ label: string; value: (r: RegionMetrics) => string }> = [
-  { label: 'Active BDMs', value: (r) => numInt.format(r.activeBdms) },
-  { label: 'Avg Final Score', value: (r) => r.avgFinalScore.toFixed(1) },
+type Metric = {
+  label: string
+  value: (r: RegionMetrics) => string
+  placeholder?: boolean
+}
+
+const METRICS: Metric[] = [
+  // Not tracked yet — no data source for new IB activations by region.
+  { label: 'New Activated IBs', value: () => 'Coming soon', placeholder: true },
+  { label: 'Average Final Score', value: (r) => r.avgFinalScore.toFixed(1) },
   { label: 'Total Net Deposit', value: (r) => num2.format(r.totalNetDeposit) },
-  { label: 'Total Lots', value: (r) => numFlex.format(r.totalLots) },
-  { label: 'Total MIBs', value: (r) => numInt.format(r.totalMibs) },
   { label: 'Total Active IBs', value: (r) => numInt.format(r.totalActiveIbs) },
 ]
 
@@ -45,7 +49,13 @@ export function RegionPerformance() {
                   className='flex items-center justify-between gap-4 py-2.5'
                 >
                   <dt className='text-sm text-muted-foreground'>{m.label}</dt>
-                  <dd className='text-sm font-semibold tabular-nums'>
+                  <dd
+                    className={
+                      m.placeholder
+                        ? 'text-sm text-muted-foreground italic'
+                        : 'text-sm font-semibold tabular-nums'
+                    }
+                  >
                     {m.value(r)}
                   </dd>
                 </div>
