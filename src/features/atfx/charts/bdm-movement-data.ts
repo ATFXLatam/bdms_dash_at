@@ -31,7 +31,3 @@ const SCORED = scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH).map(
 export const BDMS_IMPROVED: BdmMovement[] = SCORED.filter(
   (b) => movement(b) > 0,
 ).sort((a, b) => movement(b) - movement(a))
-
-export const BDMS_DROPPED: BdmMovement[] = SCORED.filter(
-  (b) => movement(b) < 0,
-).sort((a, b) => movement(a) - movement(b))
