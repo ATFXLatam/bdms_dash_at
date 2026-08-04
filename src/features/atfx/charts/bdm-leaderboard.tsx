@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Award as AwardIcon, Minus, TrendingDown, TrendingUp } from 'lucide-react'
 import {
   Table,
@@ -8,14 +8,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ChartEmptyState } from '@/components/dashboard/chart-empty-state'
 import {
   computeAwards,
+  scoreBdms,
   scoreBdmsForMonth,
-  scoreBdmsInSourceOrder,
   SCORECARD_LEGEND_YEAR,
   SCORECARD_PRIMARY_MONTH,
   type RecognitionTier,
+  type ScorecardSort,
   type ScoredBdm,
 } from './bdm-scorecard-data'
 
@@ -31,7 +33,8 @@ const RECOGNITION_ACCENT: Record<
 }
 
 export function BdmLeaderboard() {
-  const rows = useMemo(() => scoreBdmsInSourceOrder(), [])
+  const [sort, setSort] = useState<ScorecardSort>('excel')
+  const rows = useMemo(() => scoreBdms(undefined, sort), [sort])
   const awards = useMemo(
     () => computeAwards(scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH)),
     [],
@@ -63,6 +66,19 @@ export function BdmLeaderboard() {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className='flex justify-end'>
+        <ToggleGroup
+          type='single'
+          variant='outline'
+          size='sm'
+          value={sort}
+          onValueChange={(v) => v && setSort(v as ScorecardSort)}
+        >
+          <ToggleGroupItem value='excel'>Excel order</ToggleGroupItem>
+          <ToggleGroupItem value='rank'>Rank order</ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       <div className='overflow-x-auto'>

@@ -124,22 +124,28 @@ export function scoreBdmsForMonth(month: string): ScoredBdm[] {
   return scoreMonth(BDM_SCORECARD.filter((e) => e.month === month))
 }
 
-// Score within each month, but keep the excel/source row order (no re-sort).
-export function scoreBdmsInSourceOrder(
+export type ScorecardSort = 'excel' | 'rank'
+
+// 'excel' — same row order as the source report (default).
+// 'rank'  — grouped by month, each month sorted by rank ascending.
+export function scoreBdms(
   entries: BdmScorecardEntry[] = BDM_SCORECARD,
+  sort: ScorecardSort = 'excel',
 ): ScoredBdm[] {
   const scoredByKey = new Map<string, ScoredBdm>()
   const months = [...new Set(entries.map((e) => e.month))]
+  const monthResults = new Map<string, ScoredBdm[]>()
   for (const month of months) {
-    for (const row of scoreMonth(entries.filter((e) => e.month === month))) {
-      scoredByKey.set(`${row.month}:${row.name}`, row)
-    }
+    const result = scoreMonth(entries.filter((e) => e.month === month))
+    monthResults.set(month, result)
+    for (const row of result) scoredByKey.set(`${row.month}:${row.name}`, row)
   }
+
+  if (sort === 'rank') return months.flatMap((month) => monthResults.get(month) ?? [])
+
   return entries.map((entry) => {
     const scored = scoredByKey.get(`${entry.month}:${entry.name}`)
-    if (!scored) {
-      throw new Error(`Missing score for ${entry.month}:${entry.name}`)
-    }
+    if (!scored) throw new Error(`Missing score for ${entry.month}:${entry.name}`)
     return scored
   })
 }

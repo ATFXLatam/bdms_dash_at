@@ -36,7 +36,7 @@ export function Dashboard() {
               <Card>
                 <DashboardCardHeader
                   title='BDM monthly scorecard'
-                  description='Jun + Jul · excel order · weighted performance score'
+                  description='Jun + Jul · ranked by weighted performance score'
                   tooltip='Monthly BDM scorecard. Final score weights Net Deposit 40%, MIB 20%, Active IB 20% and Lots 20%, each min-max normalized across BDMs. Movement compares this rank to the prior month; recognition and awards are derived from the score.'
                 />
                 <CardContent className='pb-4'>
