@@ -65,15 +65,14 @@ export const BDM_SCORECARD: BdmScorecardEntry[] = [
   { name: 'Joao Sandi', status: 'Active', month: 'Jul', country: 'Brazil', team: 'LATAM South', netDeposit: -7360.78, mibs: 5, activeIbs: 0, lots: 14.27, prevRank: 11 },
   { name: 'Joel Flores', status: 'Active', month: 'Jul', country: 'México', team: 'México', netDeposit: 131449.75, mibs: 3, activeIbs: 0, lots: 221.97, prevRank: 10 },
   { name: 'Juan Tachack', status: 'Active', month: 'Jul', country: 'Colombia', team: 'Colombia & Peru', netDeposit: -41840.96, mibs: 9, activeIbs: 3, lots: 88.18, prevRank: 3 },
-  { name: 'Juliana Alonso', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: -3835.35, mibs: 2, activeIbs: 0, lots: 26.9, prevRank: 6 },
+  { name: 'Juliana Alonso', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: -3835.35, mibs: 3, activeIbs: 0, lots: 26.9, prevRank: 6 },
   { name: 'Lucia Villalobos', status: 'Active', month: 'Jul', country: 'México', team: 'México', netDeposit: 3320.02, mibs: 8, activeIbs: 0, lots: 0, prevRank: 14 },
   { name: 'Nicole Coronel', status: 'Active', month: 'Jul', country: 'Ecuador', team: 'Ecuador', netDeposit: 11831.19, mibs: 3, activeIbs: 0, lots: 67.25, prevRank: 12 },
   { name: 'Rafael Caballero', status: 'Active', month: 'Jul', country: 'Colombia', team: 'Colombia & Peru', netDeposit: -741.55, mibs: 1, activeIbs: 0, lots: 194.32, prevRank: 9 },
   { name: 'Sergio Vargas', status: 'Active', month: 'Jul', country: 'Colombia', team: 'Colombia & Peru', netDeposit: 5562.9, mibs: 4, activeIbs: 1, lots: 224.97, prevRank: 2 },
-  { name: 'Yanina Blanco', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: 620126.82, mibs: 0, activeIbs: 0, lots: 6090.19, prevRank: 1 },
+  { name: 'Yanina Blanco', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: 620126.82, mibs: 77, activeIbs: 2, lots: 6090.19, prevRank: 1 },
   { name: 'Federico Pereira', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: 0, mibs: 1, activeIbs: 0, lots: 0, prevRank: 17 },
-  { name: 'Yennifer Caballero', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: -3901.16, mibs: 0, activeIbs: 0, lots: 359.72, prevRank: 13 },
-  { name: 'Yesica Tovar', status: 'Inactive', month: 'Jul', country: 'Colombia', team: 'Colombia & Peru', netDeposit: -106.47, mibs: 0, activeIbs: 0, lots: 11.71, prevRank: 16 },
+  { name: 'Yennifer Caballero', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: -3901.16, mibs: 6, activeIbs: 5, lots: 359.72, prevRank: 13 },
 ]
 
 function minMaxScaler(values: number[]): (value: number) => number {
