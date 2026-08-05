@@ -31,8 +31,6 @@ export interface ScoredBdm extends BdmScorecardEntry {
   recognition: RecognitionTier
 }
 
-export const SCORECARD_MONTH = 'June'
-export const SCORECARD_PRIMARY_MONTH = 'Jun'
 export const SCORECARD_LEGEND_YEAR = '2026'
 
 export const SCORE_WEIGHTS = {
@@ -146,6 +144,21 @@ export const SCORECARD_MONTHS = [
   ...new Set(BDM_SCORECARD.map((e) => e.month)),
 ]
 
+// Most recent reporting month — widgets default to this instead of a fixed month.
+export const LATEST_SCORECARD_MONTH =
+  SCORECARD_MONTHS[SCORECARD_MONTHS.length - 1]
+
+// "New Activated IBs" per team == sum of Active New IB's (activeIbs) for the month.
+export function sumActiveIbsByTeam(month: string): Record<string, number> {
+  return BDM_SCORECARD.filter((e) => e.month === month).reduce(
+    (acc, e) => {
+      acc[e.team] = (acc[e.team] ?? 0) + e.activeIbs
+      return acc
+    },
+    {} as Record<string, number>,
+  )
+}
+
 export type ScorecardSort = 'rank' | 'excel'
 
 export interface Award {
@@ -155,7 +168,7 @@ export interface Award {
 }
 
 export function computeAwards(
-  scored: ScoredBdm[] = scoreBdmsForMonth(SCORECARD_PRIMARY_MONTH),
+  scored: ScoredBdm[] = scoreBdmsForMonth(LATEST_SCORECARD_MONTH),
 ): Award[] {
   const topBdm = scored[0]
 

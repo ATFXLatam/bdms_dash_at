@@ -21,6 +21,7 @@ import {
   computeAwards,
   scoreBdmsForMonth,
   scoreBdmsForMonthInSourceOrder,
+  LATEST_SCORECARD_MONTH,
   SCORECARD_LEGEND_YEAR,
   SCORECARD_MONTHS,
   type RecognitionTier,
@@ -42,9 +43,7 @@ const RECOGNITION_ACCENT: Record<
 }
 
 export function BdmLeaderboard() {
-  const [month, setMonth] = useState<string>(
-    SCORECARD_MONTHS[SCORECARD_MONTHS.length - 1] ?? SCORECARD_MONTHS[0],
-  )
+  const [month, setMonth] = useState<string>(LATEST_SCORECARD_MONTH)
   const [sort, setSort] = useState<ScorecardSort>('rank')
   const rows = useMemo(
     () =>

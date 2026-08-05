@@ -1,6 +1,10 @@
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
+  LATEST_SCORECARD_MONTH,
+  sumActiveIbsByTeam,
+} from './bdm-scorecard-data'
+import {
   REGION_PERFORMANCE,
   type RegionMetrics,
 } from './region-performance-data'
@@ -11,15 +15,26 @@ const num2 = new Intl.NumberFormat('en-US', {
 })
 const numInt = new Intl.NumberFormat('en-US')
 
+// Region names differ slightly from BDM_SCORECARD team names (diacritics only).
+const REGION_TO_TEAM: Record<string, string> = {
+  Mexico: 'México',
+}
+
+const ACTIVE_IBS_BY_TEAM = sumActiveIbsByTeam(LATEST_SCORECARD_MONTH)
+
 type Metric = {
   label: string
   value: (r: RegionMetrics) => string
-  placeholder?: boolean
 }
 
 const METRICS: Metric[] = [
-  // Not tracked yet — no data source for new IB activations by region.
-  { label: 'New Activated IBs', value: () => 'Coming soon', placeholder: true },
+  {
+    label: 'New Activated IBs',
+    value: (r) => {
+      const team = REGION_TO_TEAM[r.region] ?? r.region
+      return numInt.format(ACTIVE_IBS_BY_TEAM[team] ?? 0)
+    },
+  },
   { label: 'Average Final Score', value: (r) => r.avgFinalScore.toFixed(1) },
   { label: 'Total Net Deposit', value: (r) => num2.format(r.totalNetDeposit) },
   { label: 'Total Active IBs', value: (r) => numInt.format(r.totalActiveIbs) },
@@ -49,13 +64,7 @@ export function RegionPerformance() {
                   className='flex items-center justify-between gap-4 py-2.5'
                 >
                   <dt className='text-sm text-muted-foreground'>{m.label}</dt>
-                  <dd
-                    className={
-                      m.placeholder
-                        ? 'text-sm text-muted-foreground italic'
-                        : 'text-sm font-semibold tabular-nums'
-                    }
-                  >
+                  <dd className='text-sm font-semibold tabular-nums'>
                     {m.value(r)}
                   </dd>
                 </div>
