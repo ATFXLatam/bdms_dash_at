@@ -12,25 +12,25 @@ export interface RegionMetrics {
 export const REGION_PERFORMANCE: RegionMetrics[] = [
   {
     region: 'Mexico',
-    avgFinalScore: 0,
+    avgFinalScore: 10.68,
     totalNetDeposit: -158.34,
     totalActiveIbs: 13,
   },
   {
     region: 'Colombia & Peru',
-    avgFinalScore: 0,
+    avgFinalScore: 15.93,
     totalNetDeposit: 146061.73,
     totalActiveIbs: 15,
   },
   {
     region: 'LATAM South',
-    avgFinalScore: 0,
+    avgFinalScore: 26.22,
     totalNetDeposit: -146784.01,
     totalActiveIbs: 15,
   },
   {
     region: 'Ecuador',
-    avgFinalScore: 0,
+    avgFinalScore: 6.36,
     totalNetDeposit: 8062.59,
     totalActiveIbs: 3,
   },
