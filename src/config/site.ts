@@ -2,7 +2,7 @@
 export const siteConfig = {
   name: 'BDMS Dashboard',
   shortName: 'BDMS',
-  tagline: 'BDM performance · Jun + Jul · authenticated access',
+  tagline: 'BDM performance dashboard',
   description:
     'Internal BDMS board — hardcoded scorecard and accounts tables with Clerk auth.',
   version: '0.3.0',

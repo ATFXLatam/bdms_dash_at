@@ -1,3 +1,12 @@
+import { useState } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { DashboardCardHeader } from '@/components/dashboard/dashboard-card-header'
 import { DashboardSection } from '@/components/dashboard/dashboard-section'
 import { SiteHeader } from '@/components/dashboard/site-header'
@@ -5,14 +14,23 @@ import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { Card, CardContent } from '@/components/ui/card'
 import { BdmLeaderboard } from '@/features/atfx/charts/bdm-leaderboard'
+import { BdmMetricCharts } from '@/features/atfx/charts/bdm-metric-charts'
 import { BdmMovementBoards } from '@/features/atfx/charts/bdm-movement'
-import { RegionPerformance } from '@/features/atfx/charts/region-performance'
+import {
+  LATEST_SCORECARD_MONTH,
+  MONTH_LABELS,
+  SCORECARD_MONTHS,
+  SCORE_WEIGHTS,
+} from '@/features/atfx/charts/bdm-scorecard-data'
 
 const DASHBOARD_PAD = 'w-full px-[clamp(0.75rem,3.5vw,3rem)]'
 
+const WEIGHT_TOOLTIP = `Monthly BDM scorecard. Final score weights Net Deposit ${SCORE_WEIGHTS.netDeposit * 100}%, MIB ${SCORE_WEIGHTS.mibs * 100}%, Active IB ${SCORE_WEIGHTS.activeIbs * 100}% and Lots ${SCORE_WEIGHTS.lots * 100}%. Net Deposit is min-max normalized; MIB, Active IB and Lots are scaled to the month max. Movement compares this rank to the prior month; recognition and awards are derived from the score. Metric values are not shown.`
+
 export function Dashboard() {
+  const [month, setMonth] = useState(LATEST_SCORECARD_MONTH)
+
   return (
     <>
       <Header>
@@ -31,21 +49,47 @@ export function Dashboard() {
             <DashboardSection
               title='BDM performance'
               description='Monthly scorecard, movement and recognition'
+              action={
+                <div className='flex items-center gap-2'>
+                  <label
+                    htmlFor='bdm-scorecard-month'
+                    className='text-sm font-medium'
+                  >
+                    Month
+                  </label>
+                  <Select value={month} onValueChange={setMonth}>
+                    <SelectTrigger
+                      id='bdm-scorecard-month'
+                      size='sm'
+                      className='w-32'
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SCORECARD_MONTHS.map((m) => (
+                        <SelectItem key={m} value={m}>
+                          {MONTH_LABELS[m] ?? m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              }
             >
               <Card>
                 <DashboardCardHeader
                   title='BDM monthly scorecard'
-                  description='Jun + Jul · ranked by weighted performance score'
-                  tooltip='Monthly BDM scorecard. Final score weights Net Deposit 40%, MIB 20%, Active IB 20% and Lots 20%, each min-max normalized across BDMs. Movement compares this rank to the prior month; recognition and awards are derived from the score.'
+                  description={`${MONTH_LABELS[month] ?? month} · ranked by weighted performance score`}
+                  tooltip={WEIGHT_TOOLTIP}
                 />
                 <CardContent className='pb-4'>
-                  <BdmLeaderboard />
+                  <BdmLeaderboard month={month} />
                 </CardContent>
               </Card>
 
-              <BdmMovementBoards />
+              <BdmMovementBoards month={month} />
 
-              <RegionPerformance />
+              <BdmMetricCharts month={month} />
             </DashboardSection>
           </div>
         </div>

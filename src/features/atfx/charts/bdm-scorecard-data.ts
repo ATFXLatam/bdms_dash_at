@@ -31,14 +31,18 @@ export interface ScoredBdm extends BdmScorecardEntry {
   recognition: RecognitionTier
 }
 
-export const SCORECARD_LEGEND_YEAR = '2026'
-
 export const SCORE_WEIGHTS = {
-  netDeposit: 0.4,
-  mibs: 0.2,
-  activeIbs: 0.2,
-  lots: 0.2,
+  netDeposit: 0.6,
+  mibs: 0.15,
+  activeIbs: 0.15,
+  lots: 0.1,
 } as const
+
+export const MONTH_LABELS: Record<string, string> = {
+  Jun: 'June',
+  Jul: 'July',
+  Aug: 'August',
+}
 
 export const BDM_SCORECARD: BdmScorecardEntry[] = [
   { name: 'Alejandro Granados', status: 'Active', month: 'Jun', country: 'México', team: 'México', netDeposit: 9951.24, mibs: 10, activeIbs: 2, lots: 67.75, prevRank: 1 },
@@ -71,13 +75,36 @@ export const BDM_SCORECARD: BdmScorecardEntry[] = [
   { name: 'Yanina Blanco', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: 620126.82, mibs: 77, activeIbs: 2, lots: 6090.19, prevRank: 1 },
   { name: 'Federico Pereira', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: 0, mibs: 1, activeIbs: 0, lots: 0, prevRank: 17 },
   { name: 'Yennifer Caballero', status: 'Active', month: 'Jul', country: 'Uruguay', team: 'LATAM South', netDeposit: -3901.16, mibs: 6, activeIbs: 5, lots: 359.72, prevRank: 13 },
+  { name: 'Alejandro Granados', status: 'Active', month: 'Aug', country: 'México', team: 'México', netDeposit: 15804.55, mibs: 2, activeIbs: 0, lots: 186.98, prevRank: 4 },
+  { name: 'Carmen Jimenez', status: 'Active', month: 'Aug', country: 'Colombia', team: 'Colombia & Peru', netDeposit: 4304.36, mibs: 3, activeIbs: 3, lots: 22.12, prevRank: 5 },
+  { name: 'Emanuel Diaz', status: 'Active', month: 'Aug', country: 'Colombia', team: 'Colombia & Peru', netDeposit: 8989.78, mibs: 7, activeIbs: 3, lots: 0, prevRank: 6 },
+  { name: 'Gerardo Sanchez', status: 'Active', month: 'Aug', country: 'México', team: 'México', netDeposit: 8090.91, mibs: 3, activeIbs: 0, lots: 630.14, prevRank: 15 },
+  { name: 'Joao Sandi', status: 'Active', month: 'Aug', country: 'Brazil', team: 'LATAM South', netDeposit: -1184.17, mibs: 0, activeIbs: 1, lots: 32.74, prevRank: 12 },
+  { name: 'Joel Flores', status: 'Active', month: 'Aug', country: 'México', team: 'México', netDeposit: 89161.96, mibs: 4, activeIbs: 3, lots: 425.86, prevRank: 3 },
+  { name: 'Juan Tachack', status: 'Active', month: 'Aug', country: 'Colombia', team: 'Colombia & Peru', netDeposit: -25962.32, mibs: 5, activeIbs: 1, lots: 80.26, prevRank: 7 },
+  { name: 'Lucia Villalobos', status: 'Active', month: 'Aug', country: 'México', team: 'México', netDeposit: 500.0, mibs: 4, activeIbs: 0, lots: 969.53, prevRank: 9 },
+  { name: 'Nicole Coronel', status: 'Active', month: 'Aug', country: 'Ecuador', team: 'Ecuador', netDeposit: -941.87, mibs: 0, activeIbs: 1, lots: 37.48, prevRank: 10 },
+  { name: 'Rafael Caballero', status: 'Active', month: 'Aug', country: 'Colombia', team: 'Colombia & Peru', netDeposit: -10218.37, mibs: 1, activeIbs: 0, lots: 151.39, prevRank: 11 },
+  { name: 'Sergio Vargas', status: 'Active', month: 'Aug', country: 'Colombia', team: 'Colombia & Peru', netDeposit: -42346.94, mibs: 4, activeIbs: 3, lots: 330.62, prevRank: 8 },
+  { name: 'Yanina Blanco', status: 'Active', month: 'Aug', country: 'Uruguay', team: 'LATAM South', netDeposit: 600206.92, mibs: 0, activeIbs: 0, lots: 6504.63, prevRank: 1 },
+  { name: 'Federico Pereira', status: 'Active', month: 'Aug', country: 'Uruguay', team: 'LATAM South', netDeposit: 208.23, mibs: 9, activeIbs: 1, lots: 1.52, prevRank: 14 },
+  { name: 'Yennifer Caballero', status: 'Active', month: 'Aug', country: 'Uruguay', team: 'LATAM South', netDeposit: 8358.11, mibs: 0, activeIbs: 0, lots: 57.92, prevRank: 2 },
 ]
 
-function minMaxScaler(values: number[]): (value: number) => number {
-  const min = Math.min(...values)
-  const max = Math.max(...values)
+function minMaxRatio(value: number, min: number, max: number): number {
   const range = max - min
-  return (value) => (range === 0 ? 0 : (value - min) / range)
+  return range === 0 ? 0 : (value - min) / range
+}
+
+function maxRatio(value: number, max: number): number {
+  return max === 0 ? 0 : value / max
+}
+
+// RANK.EQ descending: ties share a rank; the next rank is skipped.
+function rankEqDescending(scores: number[]): number[] {
+  return scores.map(
+    (score) => 1 + scores.filter((other) => other > score).length
+  )
 }
 
 // rank 1 = Top Performer; ranks 2-5 = High Performer; positive Net Deposit
@@ -89,74 +116,123 @@ function recognitionFor(rank: number, netDeposit: number): RecognitionTier {
   return 'No Recognition'
 }
 
-function scoreMonth(entries: BdmScorecardEntry[]): ScoredBdm[] {
+function scoreMonth(
+  entries: BdmScorecardEntry[],
+  prevRankByName?: Map<string, number>
+): ScoredBdm[] {
   if (entries.length === 0) return []
 
-  const scaleNetDeposit = minMaxScaler(entries.map((e) => e.netDeposit))
-  const scaleMibs = minMaxScaler(entries.map((e) => e.mibs))
-  const scaleActiveIbs = minMaxScaler(entries.map((e) => e.activeIbs))
-  const scaleLots = minMaxScaler(entries.map((e) => e.lots))
+  const nets = entries.map((e) => e.netDeposit)
+  const mibs = entries.map((e) => e.mibs)
+  const activeIbs = entries.map((e) => e.activeIbs)
+  const lots = entries.map((e) => e.lots)
+  const minNet = Math.min(...nets)
+  const maxNet = Math.max(...nets)
+  const maxMibs = Math.max(...mibs)
+  const maxActiveIbs = Math.max(...activeIbs)
+  const maxLots = Math.max(...lots)
 
-  const scored = entries
-    .map((e) => {
-      const weighted =
-        SCORE_WEIGHTS.netDeposit * scaleNetDeposit(e.netDeposit) +
-        SCORE_WEIGHTS.mibs * scaleMibs(e.mibs) +
-        SCORE_WEIGHTS.activeIbs * scaleActiveIbs(e.activeIbs) +
-        SCORE_WEIGHTS.lots * scaleLots(e.lots)
-      return {
-        ...e,
-        score: Math.round(weighted * 1000) / 10,
-        ibActivationRate: e.mibs > 0 ? e.activeIbs / e.mibs : null,
-      }
-    })
-    .sort((a, b) => b.score - a.score)
-
-  return scored.map((e, i) => {
-    const rank = i + 1
-    const movement = e.prevRank - rank
+  const withScore = entries.map((e) => {
+    const weighted =
+      SCORE_WEIGHTS.netDeposit * minMaxRatio(e.netDeposit, minNet, maxNet) +
+      SCORE_WEIGHTS.mibs * maxRatio(e.mibs, maxMibs) +
+      SCORE_WEIGHTS.activeIbs * maxRatio(e.activeIbs, maxActiveIbs) +
+      SCORE_WEIGHTS.lots * maxRatio(e.lots, maxLots)
     return {
       ...e,
-      rank,
-      movement,
-      recognition: recognitionFor(rank, e.netDeposit),
+      score: Math.round(weighted * 10000) / 100,
+      ibActivationRate: e.mibs > 0 ? e.activeIbs / e.mibs : null,
     }
   })
+
+  const ranks = rankEqDescending(withScore.map((e) => e.score))
+
+  return withScore
+    .map((e, i) => {
+      const rank = ranks[i] ?? i + 1
+      const prevRank = prevRankByName?.get(e.name) ?? e.prevRank
+      return {
+        ...e,
+        prevRank,
+        rank,
+        movement: prevRank - rank,
+        recognition: recognitionFor(rank, e.netDeposit),
+      }
+    })
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
 }
 
+export const SCORECARD_MONTHS = [...new Set(BDM_SCORECARD.map((e) => e.month))]
+
+// Most recent reporting month — widgets default to this instead of a fixed month.
+export const LATEST_SCORECARD_MONTH =
+  SCORECARD_MONTHS[SCORECARD_MONTHS.length - 1]
+
 export function scoreBdmsForMonth(month: string): ScoredBdm[] {
-  return scoreMonth(BDM_SCORECARD.filter((e) => e.month === month))
+  const entries = BDM_SCORECARD.filter((e) => e.month === month)
+  const idx = SCORECARD_MONTHS.indexOf(month)
+  const prevMonth = idx > 0 ? SCORECARD_MONTHS[idx - 1] : undefined
+  const prevRankByName = prevMonth
+    ? new Map(scoreBdmsForMonth(prevMonth).map((row) => [row.name, row.rank]))
+    : undefined
+  return scoreMonth(entries, prevRankByName)
 }
 
 // Same rows as scoreBdmsForMonth, but keeps the source report's row order
 // instead of re-sorting by score.
 export function scoreBdmsForMonthInSourceOrder(month: string): ScoredBdm[] {
   const entries = BDM_SCORECARD.filter((e) => e.month === month)
-  const byName = new Map(scoreMonth(entries).map((row) => [row.name, row]))
+  const byName = new Map(scoreBdmsForMonth(month).map((row) => [row.name, row]))
   return entries.map((entry) => {
     const scored = byName.get(entry.name)
-    if (!scored) throw new Error(`Missing score for ${entry.month}:${entry.name}`)
+    if (!scored)
+      throw new Error(`Missing score for ${entry.month}:${entry.name}`)
     return scored
   })
 }
 
-export const SCORECARD_MONTHS = [
-  ...new Set(BDM_SCORECARD.map((e) => e.month)),
+export type BdmMetricKey =
+  | 'netDeposit'
+  | 'mibs'
+  | 'activeIbs'
+  | 'lots'
+  | 'score'
+
+export interface BdmChartRow {
+  name: string
+  value: number
+}
+
+export function bdmsRankedByMetric(
+  month: string,
+  field: BdmMetricKey
+): BdmChartRow[] {
+  return [...scoreBdmsForMonth(month)]
+    .sort((a, b) => b[field] - a[field] || a.name.localeCompare(b.name))
+    .map((row) => ({ name: row.name, value: row[field] }))
+}
+
+export function topBdmsByScore(month: string, limit = 10): BdmChartRow[] {
+  return scoreBdmsForMonth(month)
+    .slice(0, limit)
+    .map((row) => ({ name: row.name, value: row.score }))
+}
+
+export const RECOGNITION_ORDER: RecognitionTier[] = [
+  'Top Performer',
+  'High Performer',
+  'Growth Contribution',
+  'No Recognition',
 ]
 
-// Most recent reporting month — widgets default to this instead of a fixed month.
-export const LATEST_SCORECARD_MONTH =
-  SCORECARD_MONTHS[SCORECARD_MONTHS.length - 1]
-
-// "New Activated IBs" per team == sum of Active New IB's (activeIbs) for the month.
-export function sumActiveIbsByTeam(month: string): Record<string, number> {
-  return BDM_SCORECARD.filter((e) => e.month === month).reduce(
-    (acc, e) => {
-      acc[e.team] = (acc[e.team] ?? 0) + e.activeIbs
-      return acc
-    },
-    {} as Record<string, number>,
-  )
+export function recognitionDistribution(
+  month: string
+): Array<{ name: RecognitionTier; value: number }> {
+  const rows = scoreBdmsForMonth(month)
+  return RECOGNITION_ORDER.map((name) => ({
+    name,
+    value: rows.filter((row) => row.recognition === name).length,
+  })).filter((row) => row.value > 0)
 }
 
 export type ScorecardSort = 'rank' | 'excel'
@@ -168,27 +244,29 @@ export interface Award {
 }
 
 export function computeAwards(
-  scored: ScoredBdm[] = scoreBdmsForMonth(LATEST_SCORECARD_MONTH),
+  scored: ScoredBdm[] = scoreBdmsForMonth(LATEST_SCORECARD_MONTH)
 ): Award[] {
-  const topBdm = scored[0]
+  if (scored.length === 0) return []
 
+  const topBdm = scored[0]
   const mostImproved = [...scored].sort(
-    (a, b) => b.movement - a.movement || b.score - a.score,
+    (a, b) => b.movement - a.movement || b.score - a.score
   )[0]
+  if (!topBdm || !mostImproved) return []
 
   const bestIb = [...scored]
     .filter((b) => b.mibs > 0 && b.ibActivationRate !== null)
     .sort(
       (a, b) =>
         (b.ibActivationRate ?? 0) - (a.ibActivationRate ?? 0) ||
-        b.activeIbs - a.activeIbs,
+        b.activeIbs - a.activeIbs
     )[0]
 
   const awards: Award[] = [
     {
       title: 'Top BDM of the Month',
       bdm: topBdm,
-      detail: `Highest weighted score (${topBdm.score.toFixed(1)})`,
+      detail: `Rank #${topBdm.rank}`,
     },
     {
       title: 'Most Improved BDM',
@@ -201,9 +279,7 @@ export function computeAwards(
     awards.push({
       title: 'Best IB Activation',
       bdm: bestIb,
-      detail: `${bestIb.activeIbs}/${bestIb.mibs} MIBs active (${Math.round(
-        (bestIb.ibActivationRate ?? 0) * 100,
-      )}%)`,
+      detail: 'Highest IB activation rate',
     })
   }
 

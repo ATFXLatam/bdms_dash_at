@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Award as AwardIcon, Minus, TrendingDown, TrendingUp } from 'lucide-react'
+import {
+  Award as AwardIcon,
+  Minus,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -8,30 +13,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ChartEmptyState } from '@/components/dashboard/chart-empty-state'
 import {
   computeAwards,
   scoreBdmsForMonth,
   scoreBdmsForMonthInSourceOrder,
-  LATEST_SCORECARD_MONTH,
-  SCORECARD_LEGEND_YEAR,
-  SCORECARD_MONTHS,
+  SCORE_WEIGHTS,
   type RecognitionTier,
   type ScorecardSort,
   type ScoredBdm,
 } from './bdm-scorecard-data'
 
 const RANK_BADGES = ['🥇', '🥈', '🥉'] as const
-
-const MONTH_LABELS: Record<string, string> = { Jun: 'June', Jul: 'July' }
 
 const RECOGNITION_ACCENT: Record<
   Exclude<RecognitionTier, 'No Recognition'>,
@@ -42,20 +36,18 @@ const RECOGNITION_ACCENT: Record<
   'Growth Contribution': 'text-emerald-600 dark:text-emerald-400',
 }
 
-export function BdmLeaderboard() {
-  const [month, setMonth] = useState<string>(LATEST_SCORECARD_MONTH)
+const WEIGHT_LEGEND = `weighted score (Net Deposit ${SCORE_WEIGHTS.netDeposit * 100}% · MIB ${SCORE_WEIGHTS.mibs * 100}% · Active IB ${SCORE_WEIGHTS.activeIbs * 100}% · Lots ${SCORE_WEIGHTS.lots * 100}%)`
+
+export function BdmLeaderboard({ month }: { month: string }) {
   const [sort, setSort] = useState<ScorecardSort>('rank')
   const rows = useMemo(
     () =>
       sort === 'rank'
         ? scoreBdmsForMonth(month)
         : scoreBdmsForMonthInSourceOrder(month),
-    [month, sort],
+    [month, sort]
   )
-  const awards = useMemo(
-    () => computeAwards(scoreBdmsForMonth(month)),
-    [month],
-  )
+  const awards = useMemo(() => computeAwards(scoreBdmsForMonth(month)), [month])
 
   return (
     <div className='space-y-4'>
@@ -82,25 +74,7 @@ export function BdmLeaderboard() {
         ))}
       </div>
 
-      <div className='flex flex-wrap items-center justify-between gap-3'>
-        <div className='flex items-center gap-2'>
-          <label htmlFor='bdm-scorecard-month' className='text-sm font-medium'>
-            Month
-          </label>
-          <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger id='bdm-scorecard-month' size='sm' className='w-32'>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SCORECARD_MONTHS.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {MONTH_LABELS[m] ?? m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
+      <div className='flex flex-wrap items-center justify-end gap-3'>
         <ToggleGroup
           type='single'
           variant='outline'
@@ -121,7 +95,7 @@ export function BdmLeaderboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>BDM Name</TableHead>
-                <TableHead className='text-end'>Final Score</TableHead>
+                <TableHead className='text-end'>Rank</TableHead>
                 <TableHead className='text-center'>Movement</TableHead>
                 <TableHead>Recognition</TableHead>
               </TableRow>
@@ -136,8 +110,8 @@ export function BdmLeaderboard() {
       )}
 
       <p className='text-xs text-muted-foreground'>
-        {SCORECARD_LEGEND_YEAR} · weighted score (Net Deposit 40% · MIB 20% ·
-        Active IB 20% · Lots 20%), min-max normalized across BDMs.
+        {WEIGHT_LEGEND}. Metric values are hidden; bars show relative standing
+        only.
       </p>
     </div>
   )
@@ -159,12 +133,12 @@ function LeaderRow({ row }: { row: ScoredBdm }) {
           ) : null}
           {row.name}
           {row.rank <= 5 ? (
-            <span className='rounded bg-[var(--highlight)]/10 px-1.5 py-0.5 text-[0.625rem] font-medium uppercase leading-none text-[var(--highlight)]'>
+            <span className='rounded bg-[var(--highlight)]/10 px-1.5 py-0.5 text-[0.625rem] leading-none font-medium text-[var(--highlight)] uppercase'>
               Top 5
             </span>
           ) : null}
           {row.status === 'Inactive' ? (
-            <span className='rounded bg-muted px-1.5 py-0.5 text-[0.625rem] font-medium uppercase leading-none text-muted-foreground'>
+            <span className='rounded bg-muted px-1.5 py-0.5 text-[0.625rem] leading-none font-medium text-muted-foreground uppercase'>
               Inactive
             </span>
           ) : null}
@@ -172,7 +146,7 @@ function LeaderRow({ row }: { row: ScoredBdm }) {
       </TableCell>
       <TableCell className='text-end'>
         <span className='inline-flex min-w-12 justify-center rounded-full bg-muted px-2 py-0.5 text-sm font-semibold tabular-nums'>
-          {row.score.toFixed(1)}
+          #{row.rank}
         </span>
       </TableCell>
       <TableCell className='text-center'>

@@ -1,25 +1,32 @@
+import { useMemo } from 'react'
 import { TrendingUp } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { BDMS_IMPROVED, movement, type BdmMovement } from './bdm-movement-data'
+import {
+  bdmsWhoImproved,
+  movement,
+  type BdmMovement,
+} from './bdm-movement-data'
 
-export function BdmMovementBoards() {
+export function BdmMovementBoards({ month }: { month: string }) {
+  const improved = useMemo(() => bdmsWhoImproved(month), [month])
+
   return (
     <Card className='gap-4 py-5'>
       <div className='flex items-center gap-2 px-5'>
         <TrendingUp className='size-4 shrink-0 text-emerald-600 dark:text-emerald-400' />
         <h3 className='text-base font-semibold'>BDMs Who Improved</h3>
         <span className='text-sm text-muted-foreground tabular-nums'>
-          ({BDMS_IMPROVED.length})
+          ({improved.length})
         </span>
       </div>
 
-      {BDMS_IMPROVED.length === 0 ? (
+      {improved.length === 0 ? (
         <p className='px-5 py-8 text-sm text-muted-foreground'>
           No BDMs in this category
         </p>
       ) : (
         <ol className='space-y-2 px-5'>
-          {BDMS_IMPROVED.map((row, i) => (
+          {improved.map((row, i) => (
             <MovementRow key={`${row.name}-${i}`} row={row} />
           ))}
         </ol>
@@ -40,8 +47,7 @@ function MovementRow({ row }: { row: BdmMovement }) {
           {row.name}
         </p>
         <p className='text-xs text-muted-foreground tabular-nums'>
-          Prev: #{row.prevRank} · Current: #{row.currentRank} · Score:{' '}
-          {row.score.toFixed(1)}
+          Prev: #{row.prevRank} · Current: #{row.currentRank}
         </p>
       </div>
 
